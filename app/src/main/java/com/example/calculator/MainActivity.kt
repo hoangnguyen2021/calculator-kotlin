@@ -46,25 +46,38 @@ class MainActivity : AppCompatActivity() {
         val clearButton: Button = findViewById(R.id.btn_clear)
         val negativeButton: Button = findViewById(R.id.btn_negative)
 
-        // digit buttons' handler
+        /*  digit buttons' handler
+            if newValue is true,
+                replace the screen text with the button text
+            otherwise,
+                append the screen text with the button text
+                (if the screen text is "-0", remove "0"
+                before appending)
+         */
         digitButtons.forEach { button: Button ->
             button.setOnClickListener {
                 if (newValue) {
                     screen.text = (it as Button).text
                     newValue = false
                 } else {
-                    if (screen.text.endsWith('0')) {
-                        val screenText = screen.text.toString()
-                        screen.text = screenText.substring(0, screenText.length - 1)
+                    if (screen.text.toString() == "0") {
+                        screen.text = ""
+                    } else if (screen.text.toString() == "-0") {
+                        screen.text = "-"
                     }
                     screen.append((it as Button).text)
                 }
             }
         }
 
-        // dot button's handler
+        /*  dot button's handler
+            if screen text ends with '.', do nothing.
+            otherwise:
+                if newValue is true, set screen text to "0."
+                if newValue is false, append "." to screen text
+        */
         dotButton.setOnClickListener {
-            if (!screen.text.endsWith('.')) {
+            if (!screen.text.contains('.')) {
                 if (newValue) {
                     screen.text = "0."
                     newValue = false
@@ -74,7 +87,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // operator button's handler
+        /*  operator button's handler
+            if newValue is false,
+                set newValue to true
+                if prevOp is "=", save screen text to operand1
+                if prevOp is "+", "-", "*", or "/", save screen text to
+                    operand2, perform calculation, show result on screen,
+                    save result to operand1, and set operand2 to 0
+                update prevOp
+            otherwise, only update prevOp
+         */
         operatorButtons.forEach { button: Button ->
             button.setOnClickListener {
                 if (!newValue) {
@@ -86,7 +108,7 @@ class MainActivity : AppCompatActivity() {
                         "+" -> {
                             operand2 = screen.text.toString().toDouble()
                             val result: Double = operand1 + operand2
-                            screen.text = result.toString()
+                            screen.text = removeDotZero(result.toString())
                             operand1 = result
                             operand2 = 0.0
 
@@ -94,21 +116,23 @@ class MainActivity : AppCompatActivity() {
                         "-" -> {
                             operand2 = screen.text.toString().toDouble()
                             val result: Double = operand1 - operand2
-                            screen.text = result.toString()
+                            screen.text = removeDotZero(result.toString())
                             operand1 = result
                             operand2 = 0.0
                         }
                         "*" -> {
                             operand2 = screen.text.toString().toDouble()
                             val result: Double = operand1 * operand2
-                            screen.text = result.toString()
+                            println(result)
+                            screen.text = removeDotZero(result.toString())
                             operand1 = result
                             operand2 = 0.0
                         }
                         "/" -> {
                             operand2 = screen.text.toString().toDouble()
                             val result: Double = operand1 / operand2
-                            screen.text = result.toString()
+                            println(result)
+                            screen.text = removeDotZero(result.toString())
                             operand1 = result
                             operand2 = 0.0
                         }
@@ -142,6 +166,16 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun removeDotZero(result: String): String {
+        if (result == "-0.0") {
+            return "0"
+        }
+        if (result.endsWith(".0")) {
+            return result.substring(0, result.length - 2)
+        }
+        return result
     }
 
 }
